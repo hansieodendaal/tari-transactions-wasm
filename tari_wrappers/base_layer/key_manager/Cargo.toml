@@ -1,0 +1,30 @@
+[package]
+name = "tari_key_manager"
+authors = ["The Tari Development Community"]
+description = "Tari cryptocurrency wallet key management"
+repository = "https://github.com/tari-project/tari"
+license = "BSD-3-Clause"
+version = "1.0.0-pre.13"
+edition = "2021"
+
+[features]
+default = ["key_manager_service"]
+key_manager_service = []
+
+[dependencies]
+tari_crypto = { version = "0.20.1", features = ["borsh"] }
+tari_utilities = { version = "0.7", features = ["borsh"] }
+
+argon2 = { version = "0.4.1", features = ["std", "alloc"] }
+async-trait = { version = "0.1.50" }
+derivative = "2.2.0"
+serde = { version = "1.0.106", features = ["derive"] }
+thiserror = "1.0.26"
+zeroize = "1"
+
+[build-dependencies]
+tari_common = { git = "https://github.com/tari-project/tari.git", rev = "1d6e0d84c9553fbb3479e2605e6122d9dd1791db", features = ["build", "static-application-info"] }
+
+[dev-dependencies]
+tari_p2p = { git = "https://github.com/tari-project/tari.git", rev = "1d6e0d84c9553fbb3479e2605e6122d9dd1791db" }
+tari_test_utils = { git = "https://github.com/tari-project/tari.git", rev = "1d6e0d84c9553fbb3479e2605e6122d9dd1791db" }

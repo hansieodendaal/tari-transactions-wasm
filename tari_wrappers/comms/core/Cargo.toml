@@ -1,0 +1,17 @@
+[package]
+name = "tari_comms"
+description = "A peer-to-peer messaging system"
+authors = ["The Tari Development Community"]
+repository = "https://github.com/tari-project/tari"
+homepage = "https://tari.com"
+readme = "README.md"
+license = "BSD-3-Clause"
+version = "1.0.0-pre.13"
+edition = "2018"
+
+[dependencies]
+tari_crypto = { version = "0.20.1", features = ["borsh"] }
+
+[build-dependencies]
+
+[dev-dependencies]

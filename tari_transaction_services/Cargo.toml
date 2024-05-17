@@ -1,0 +1,40 @@
+[package]
+name = "tari_transaction_services"
+description = "Tari Transactions WASM library"
+authors = ["The Tari Development Community"]
+repository = "https://github.com/tari-project/tari"
+homepage = "https://tari.com"
+readme = "README.md"
+license = "BSD-3-Clause"
+version = "0.20.1" # Keep in line with Tari crypto
+edition = "2018"
+
+[dependencies]
+getrandom = { version = "0.2", features = ["js"] }
+
+tari_core = { path = "../tari_wrappers/base_layer/core" }
+minotari_wallet = { path = "../tari_wrappers/base_layer/wallet" }
+tari_script = { git = "https://github.com/tari-project/tari.git", rev = "1d6e0d84c9553fbb3479e2605e6122d9dd1791db" }
+tari_common_types =  { path = "../tari_wrappers/base_layer/common_types" }
+tari_comms = { path = "../tari_wrappers/comms/core" }
+
+tari_crypto = { version = "0.20.1", features = ["borsh"] }
+
+serde = { version = "1.0"}
+serde-wasm-bindgen = { version = "0.6.5" }
+wasm-bindgen = { version = "^0.2", features = ["serde-serialize"]}
+borsh = { version = "1.2", features = ["derive"] }
+
+
+[dev-dependencies]
+wasm-bindgen-test = { version = "0.3" }
+rand = { version = "0.8" }
+
+[lib]
+crate-type = ["lib", "cdylib"]
+
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = ["-Oz"]
+
+[package.metadata.cargo-machete]
+ignored = ["getrandom"] # this is so we can run cargo machete without getting false positive about macro dependancies
