@@ -1,0 +1,19 @@
+[workspace]
+
+members = [
+    "tari_wrappers/base_layer/core",
+    "tari_wrappers/base_layer/key_manager",
+    "tari_wrappers/base_layer/wallet",
+    "tari_wrappers/comms/core",
+    "tari_transaction_services",
+]
+
+# Add here until we move to edition=2021
+resolver = "2"
+
+[profile.release]
+# Shutdown when panicking so we can see the error, specifically for the wallet
+panic = "abort"
+# By default, Rust will wrap an integer in release mode instead of throwing the overflow error
+# seen in debug mode. Panicking at this time is better than silently using the wrong value.
+overflow-checks = true

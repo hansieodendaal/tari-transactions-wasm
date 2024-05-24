@@ -1,0 +1,64 @@
+[package]
+name = "tari_core"
+description = "Core Tari protocol components"
+authors = ["The Tari Development Community"]
+repository = "https://github.com/tari-project/tari"
+homepage = "https://tari.com"
+readme = "README.md"
+license = "BSD-3-Clause"
+version = "1.0.0-pre.13"
+edition = "2018"
+
+[features]
+default = ["base_node"]
+transactions = []
+mempool_proto = []
+base_node = [
+    "transactions",
+]
+
+[dependencies]
+tari_common = { git = "https://github.com/tari-project/tari.git", rev = "1d6e0d84c9553fbb3479e2605e6122d9dd1791db" }
+tari_hashing = { git = "https://github.com/tari-project/tari.git", rev = "1d6e0d84c9553fbb3479e2605e6122d9dd1791db" }
+tari_script = { git = "https://github.com/tari-project/tari.git", rev = "1d6e0d84c9553fbb3479e2605e6122d9dd1791db" }
+
+tari_comms = { path = "../../comms/core" }
+tari_common_types = { path = "../../base_layer/common_types" }
+tari_key_manager = { path = "../../base_layer/key_manager" }
+
+tari_crypto = { version = "0.20.1", features = ["borsh"] }
+tari_utilities = { version = "0.7", features = ["borsh"] }
+
+async-trait = { version = "0.1.50" }
+bitflags = { version = "2.4", features = ["serde"] }
+blake2 = "0.10"
+borsh = { version = "1.2", features = ["derive"] }
+bytes = "0.5"
+chacha20poly1305 = "0.10.1"
+decimal-rs = "0.1.42"
+derivative = "2.2.0"
+digest = "0.10"
+hex = "0.4.2"
+integer-encoding = "3.0"
+log = "0.4"
+newtype-ops = "0.1.4"
+num-traits = "0.2.15"
+num-derive = "0.3.3"
+rand = "0.8"
+serde = { version = "1.0.106", features = ["derive"] }
+serde_repr = "0.1.8"
+strum = "0.22"
+strum_macros = "0.22"
+thiserror = "1.0.26"
+zeroize = "1"
+primitive-types = { version = "0.12", features = ["serde"] }
+
+[build-dependencies]
+tari_common = { git = "https://github.com/tari-project/tari.git", rev = "1d6e0d84c9553fbb3479e2605e6122d9dd1791db", features = ["build", "static-application-info"] }
+
+[dev-dependencies]
+tari_p2p = { git = "https://github.com/tari-project/tari.git", rev = "1d6e0d84c9553fbb3479e2605e6122d9dd1791db" }
+tari_test_utils = { git = "https://github.com/tari-project/tari.git", rev = "1d6e0d84c9553fbb3479e2605e6122d9dd1791db" }
+
+[package.metadata.cargo-machete]
+ignored = ["strum", "strum_macros"] # this is so we can run cargo machete without getting false positive about macro dependancies
