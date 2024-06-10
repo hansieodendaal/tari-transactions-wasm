@@ -24,7 +24,7 @@ serde = { version = "1.0"}
 serde-wasm-bindgen = { version = "0.6.5" }
 wasm-bindgen = { version = "^0.2", features = ["serde-serialize"]}
 borsh = { version = "1.2", features = ["derive"] }
-
+#schemars = { version = "0.8" }
 
 [dev-dependencies]
 wasm-bindgen-test = { version = "0.3" }

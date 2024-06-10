@@ -1,7 +1,7 @@
 // Copyright 2022 The Tari Project
 // SPDX-License-Identifier: BSD-3-Clause
 
-use borsh::BorshDeserialize;
+use serde::{Deserialize, Serialize};
 use minotari_wallet::output_source::OutputSource;
 use tari_common_types::types::{PrivateKey, PublicKey};
 use tari_comms::types::CommsDHKE;
@@ -25,29 +25,36 @@ use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 
 use crate::{no_match, scan_error, RecoveredOutputResult};
 
+/// A struct to pass data to the output scanning function
+#[derive(Debug, Default, Serialize, Deserialize)]
+pub struct ScanOutput {
+    /// The list of known script keys
+    known_script_keys: Vec<PrivateKey>,
+    /// The wallet secret key
+    wallet_sk: PrivateKey,
+    /// The transaction output to be scanned
+    output: TransactionOutput,
+}
+
 /// Scans a transaction output for a one-sided payment belonging to this wallet. The output is scanned for a one-sided
 /// payment using the provided wallet secret key and known script keys. The output is decrypted and verified using the
 /// shared secret derived from the wallet secret key and the sender's offset public key.
 #[wasm_bindgen]
-pub fn scan_output_for_one_sided_payment(known_script_keys: Vec<String>, wallet_sk: &str, output: &str) -> JsValue {
+pub fn scan_output_for_one_sided_payment(val: JsValue) -> JsValue {
+    let scan_output: ScanOutput = match serde_wasm_bindgen::from_value(val) {
+        Ok(val) => val,
+        Err(e) => return scan_error(&format!("scan_output: {e}")),
+    };
+
     let mut known_keys: Vec<(PublicKey, PrivateKey)> = Vec::new();
-    for script_key in known_script_keys {
-        match PrivateKey::from_hex(&script_key) {
-            Ok(key) => known_keys.push((PublicKey::from_secret_key(&key), key)),
-            Err(e) => return scan_error(&e.to_string()),
-        };
+    for script_key in scan_output.known_script_keys {
+        known_keys.push((PublicKey::from_secret_key(&script_key), script_key));
     }
 
-    let wallet_sk = match PrivateKey::from_hex(wallet_sk) {
-        Ok(val) => val,
-        Err(e) => return scan_error(&format!("wallet_sk: {e}")),
-    };
+    let wallet_sk = scan_output.wallet_sk;
     let wallet_pk = PublicKey::from_secret_key(&wallet_sk);
 
-    let output: TransactionOutput = match BorshDeserialize::deserialize(&mut output.as_bytes()) {
-        Ok(val) => val,
-        Err(e) => return scan_error(&e.to_string()),
-    };
+    let output = scan_output.output;
 
     let (output, output_source, script_private_key, shared_secret) = match output.script.as_slice() {
         // ----------------------------------------------------------------------------
@@ -138,5 +145,24 @@ fn verify_onesided_output(
         }
     } else {
         no_match()
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use wasm_bindgen_test::*;
+
+    #[wasm_bindgen_test]
+    fn it_identifies_a_known_output() {
+        let commitment = "2a1a8b875b59789fe028b5500f71efadc37bc10a2c2e05f92cdd76362d9ab258".to_string();
+        let spending_key = "699b09f32420ac4ac39d926f10fb169409d446f80651e33d8454ff359dd9bb2460231eb03a33004685f44bc21854479b86816e614c326fe559097330238122f650cde9d5e8a8c8cc".to_string();
+        let script_key = "5de8d512aff4874143bd16b563930cad743cd29e27ae85c38f11556073e52706c772b75e36c7d97fe60f928e8fb6ab6fca5b1a72013ccde69ab131ad01a0a4553f61ed73bf190412".to_string();
+        let known_script = "7ee42dc80adda2a5f04c9e56601c996ab6bbf94de29e478426e7f4b6e0b908f85b".to_string();
+
+    }
+
+    #[wasm_bindgen_test]
+    fn it_does_not_identify_an_unknown_output() {
+
     }
 }

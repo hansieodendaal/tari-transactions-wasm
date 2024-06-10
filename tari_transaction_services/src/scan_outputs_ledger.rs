@@ -1,7 +1,7 @@
 // Copyright 2022 The Tari Project
 // SPDX-License-Identifier: BSD-3-Clause
 
-use borsh::BorshDeserialize;
+use serde::{Deserialize, Serialize};
 use minotari_wallet::output_source::OutputSource;
 use tari_common_types::types::{PrivateKey, PublicKey};
 use tari_comms::types::CommsDHKE;
@@ -22,24 +22,31 @@ use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 
 use crate::{no_match, scan_error, RecoveredOutputResult};
 
+/// A struct to pass data to the output scanning function
+#[derive(Debug, Default, Serialize, Deserialize)]
+pub struct ScanOutputLedger {
+    /// The wallet public spend key
+    wallet_spend_pk: PublicKey,
+    /// The wallet secret view key
+    wallet_view_sk: PrivateKey,
+    /// The transaction output to be scanned
+    output: TransactionOutput,
+}
+
 /// Scans a transaction output for a one-sided payment belonging to this ledger wallet. The output is scanned for a
 /// one-sided payment using the provided wallet secret view key and wallet public spend key. The output is decrypted
 /// and verified using the shared secret derived from the wallet secret key and the sender's offset public key.
 #[wasm_bindgen]
-pub fn scan_output_for_one_sided_payment_ledger(wallet_view_sk: &str, wallet_spend_pk: &str, output: &str) -> JsValue {
-    let wallet_view_sk = match PrivateKey::from_hex(wallet_view_sk) {
+pub fn scan_output_for_one_sided_payment_ledger(val: JsValue) -> JsValue {
+    let scan_output: ScanOutputLedger = match serde_wasm_bindgen::from_value(val) {
         Ok(val) => val,
-        Err(e) => return scan_error(&format!("wallet_sk: {e}")),
-    };
-    let wallet_spend_pk = match PublicKey::from_hex(wallet_spend_pk) {
-        Ok(val) => val,
-        Err(e) => return scan_error(&format!("wallet_sk: {e}")),
+        Err(e) => return scan_error(&format!("scan_output: {e}")),
     };
 
-    let output: TransactionOutput = match BorshDeserialize::deserialize(&mut output.as_bytes()) {
-        Ok(val) => val,
-        Err(e) => return scan_error(&e.to_string()),
-    };
+    let wallet_view_sk = scan_output.wallet_view_sk;
+    let wallet_spend_pk =scan_output.wallet_spend_pk;
+
+    let output = scan_output.output;
 
     let (output, output_source, shared_secret) = match output.script.as_slice() {
         // ----------------------------------------------------------------------------
